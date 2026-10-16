@@ -9,15 +9,18 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Question is required' });
     }
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: 'API Key விடுபட்டுள்ளது.' });
+    }
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{
           parts: [{
-            text: `You are WELL, an expert English grammar assistant. Answer this query clearly: ${question}`
+            text: `You are Bell, an expert English grammar assistant created by Sakthi Raja. Answer the user's grammar question clearly and politely in English: ${question}`
           }]
         }]
       })
@@ -25,10 +28,10 @@ export default async function handler(req, res) {
 
     const data = await response.json();
     
-    if (data.candidates && data.candidates[0].content.parts[0].text) {
+    if (data.candidates && data.candidates[0] && data.candidates[0].content.parts[0].text) {
       return res.status(200).json({ reply: data.candidates[0].content.parts[0].text });
     } else {
-      return res.status(500).json({ error: 'Invalid response from AI' });
+      return res.status(500).json({ error: 'AI பதிலளிப்பதில் பிழை ஏற்பட்டுள்ளது.' });
     }
 
   } catch (error) {
